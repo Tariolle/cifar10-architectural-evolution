@@ -6,7 +6,7 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 
 | Model | Paradigm | Status |
 |-------|----------|--------|
-| SVM (Linear) | Baseline classifier | Planned |
+| SVM (RBF Kernel) | Baseline classifier via Random Fourier Features | Training |
 | MLP | Fully connected | Planned |
 | CNN | Convolutional | Planned |
 | ResNet | Residual connections | Planned |
@@ -38,7 +38,10 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python train.py
+python train.py                                     # train from scratch, 20 epochs
+python train.py --max-epochs 50                     # custom epoch count
+python train.py --ckpt last                         # resume from last checkpoint
+python train.py --ckpt checkpoints/svm/X.ckpt --max-epochs 100
 ```
 
 TensorBoard logs are written to `./logs/`. To visualize:

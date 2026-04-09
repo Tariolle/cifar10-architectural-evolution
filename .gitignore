@@ -24,4 +24,4 @@ Thumbs.db
 
 # PyTorch Lightning checkpoints
 lightning_logs/
-*.ckpt
+checkpoints/

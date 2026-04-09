@@ -13,18 +13,23 @@ class CIFAR10LitModule(pl.LightningModule):
     automatic TensorBoard logging of both metrics.
     """
 
-    def __init__(self, model: nn.Module, lr: float = 1e-3) -> None:
+    def __init__(
+        self,
+        model: nn.Module,
+        criterion: nn.Module | None = None,
+        lr: float = 1e-3,
+    ) -> None:
         super().__init__()
-        self.model = model
+        self.model = torch.compile(model)
         self.lr = lr
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = criterion or nn.CrossEntropyLoss()
 
         # Top-1 accuracy trackers (one per phase to avoid metric leakage)
         self.train_acc = MulticlassAccuracy(num_classes=10, top_k=1)
         self.val_acc = MulticlassAccuracy(num_classes=10, top_k=1)
 
         # Persist lr (but not the model graph) inside hparams
-        self.save_hyperparameters(ignore=["model"])
+        self.save_hyperparameters(ignore=["model", "criterion"])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the wrapped model.

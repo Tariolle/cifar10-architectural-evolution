@@ -1,0 +1,27 @@
+# Data & logs (generated at runtime)
+data/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyTorch Lightning checkpoints
+lightning_logs/
+*.ckpt

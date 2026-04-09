@@ -1,0 +1,7 @@
+torch==2.11.0
+torchvision==0.26.0
+pytorch-lightning==2.6.1
+torchmetrics==1.9.0
+tensorboard==2.20.0
+fvcore==0.1.5.post20221221
+numpy==2.3.5

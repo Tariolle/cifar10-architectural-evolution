@@ -31,6 +31,7 @@ from core.lightning_module import CIFAR10LitModule
 from models.svm import SVM
 from models.mlp import MLP
 from models.cnn import CNN
+from models.resnet import ResNet20
 
 # ======================================================================
 # Model registry — maps CLI name to (model, criterion, flatten flag)
@@ -52,6 +53,14 @@ MODELS: dict[str, dict] = {
         "criterion": nn.CrossEntropyLoss,
         "flatten": False,
         "weight_decay": 1e-4,
+        "augment": True,
+    },
+    "resnet": {
+        "model": lambda: ResNet20(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 1e-4,
+        "augment": True,
     },
 }
 
@@ -97,6 +106,7 @@ def main() -> None:
         batch_size=128,
         num_workers=2,
         flatten=config["flatten"],
+        augment=config.get("augment", False),
     )
 
     # ------------------------------------------------------------------

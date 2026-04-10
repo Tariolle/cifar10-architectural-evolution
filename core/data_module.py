@@ -1,4 +1,4 @@
-"""CIFAR-10 LightningDataModule with optional flattening for baseline models."""
+"""CIFAR-10 LightningDataModule with optional flattening and data augmentation."""
 
 from __future__ import annotations
 
@@ -18,8 +18,13 @@ class CIFAR10DataModule(pl.LightningDataModule):
     """Provides train/val dataloaders for CIFAR-10.
 
     Applies standard normalization (mean=0.5, std=0.5 per channel).
-    When ``flatten=True``, reshapes each image from [3, 32, 32] to a
-    3072-dimensional vector so it can be fed to flat models (SVM, MLP).
+
+    When ``flatten=True``, reshapes images to 3072-dim vectors and preloads
+    into RAM (no augmentation — used by SVM, MLP).
+
+    When ``augment=True``, applies random horizontal flip + random crop with
+    4px padding (standard CIFAR-10 augmentation — used by CNN, ResNet, Swin).
+    Augmented data cannot be preloaded since transforms are random per epoch.
     """
 
     MEAN: tuple[float, float, float] = (0.5, 0.5, 0.5)
@@ -31,51 +36,65 @@ class CIFAR10DataModule(pl.LightningDataModule):
         batch_size: int = 128,
         num_workers: int = 2,
         flatten: bool = False,
+        augment: bool = False,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.flatten = flatten
+        self.augment = augment
 
-        # --- Transform pipeline ---
-        # PIL Image (32×32 RGB, uint8)
-        #   -> ToTensor   => Tensor [3, 32, 32] float32 in [0, 1]
-        #   -> Normalize  => Tensor [3, 32, 32] float32 in [-1, 1]
-        #   -> (flatten)  => Tensor [3072]       float32 in [-1, 1]
-        transform_list: list = [
+        # --- Val/test transform (no augmentation) ---
+        # PIL Image (32x32 RGB) -> [3, 32, 32] float32 in [-1, 1]
+        val_transforms: list = [
             transforms.ToTensor(),
             transforms.Normalize(self.MEAN, self.STD),
         ]
         if self.flatten:
-            transform_list.append(transforms.Lambda(_flatten_image))
+            val_transforms.append(transforms.Lambda(_flatten_image))
+        self.val_transform = transforms.Compose(val_transforms)
 
-        self.transform: transforms.Compose = transforms.Compose(transform_list)
+        # --- Train transform (with optional augmentation) ---
+        if self.augment:
+            # RandomCrop(32, padding=4): pad 4px on each side, crop back to 32x32
+            # RandomHorizontalFlip: 50% chance to flip
+            self.train_transform = transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32, padding=4),
+                transforms.ToTensor(),
+                transforms.Normalize(self.MEAN, self.STD),
+            ])
+        else:
+            self.train_transform = self.val_transform
 
-        self.train_dataset: CIFAR10 | None = None
-        self.val_dataset: CIFAR10 | None = None
+        self.train_dataset: TensorDataset | CIFAR10 | None = None
+        self.val_dataset: TensorDataset | CIFAR10 | None = None
 
     def _preload_as_tensors(self, train: bool) -> TensorDataset:
         """Load entire split, apply transforms once, return a TensorDataset."""
-        ds = CIFAR10(root=self.data_dir, train=train, download=True, transform=self.transform)
+        ds = CIFAR10(root=self.data_dir, train=train, download=True, transform=self.val_transform)
         xs, ys = zip(*[ds[i] for i in range(len(ds))])
         return TensorDataset(torch.stack(xs), torch.tensor(ys))
 
     def setup(self, stage: str | None = None) -> None:
-        """Download CIFAR-10 and create train / val splits.
-
-        The official test set is used as the validation set (standard practice
-        for CIFAR-10 benchmarks).
-
-        The entire dataset is preloaded into RAM as tensors so that per-sample
-        transforms and DataLoader worker overhead are paid only once instead of
-        every epoch.  CIFAR-10 is small enough (~180 MB) for this to work on
-        any machine.
-        """
+        """Download CIFAR-10 and create train / val splits."""
         if stage in ("fit", None):
-            self.train_dataset = self._preload_as_tensors(train=True)
-            self.val_dataset = self._preload_as_tensors(train=False)
-            self.num_workers = 0
+            if self.augment:
+                # Augmentation requires per-epoch random transforms — can't preload
+                self.train_dataset = CIFAR10(
+                    root=self.data_dir, train=True, download=True,
+                    transform=self.train_transform,
+                )
+                self.val_dataset = CIFAR10(
+                    root=self.data_dir, train=False, download=True,
+                    transform=self.val_transform,
+                )
+            else:
+                # No augmentation: preload into RAM for speed
+                self.train_dataset = self._preload_as_tensors(train=True)
+                self.val_dataset = self._preload_as_tensors(train=False)
+                self.num_workers = 0
 
     def train_dataloader(self) -> DataLoader:
         assert self.train_dataset is not None, "Call setup('fit') first."

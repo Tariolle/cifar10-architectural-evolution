@@ -12,7 +12,7 @@ class CNN(nn.Module):
     translation equivariance — all absent from SVM and MLP.
 
     Pipeline:
-        [B, 3, 32, 32] -> Conv block ×3 (channels: 64 → 128 → 256)
+        [B, 3, 32, 32] -> Conv block x3 (channels: 64 → 128 → 256)
                         -> AdaptiveAvgPool -> [B, 256]
                         -> FC(256, 128) -> Dropout -> FC(128, 10)
     """

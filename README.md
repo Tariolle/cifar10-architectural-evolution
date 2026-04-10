@@ -8,8 +8,8 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 |-------|----------|--------|
 | SVM (RBF Kernel) | Baseline classifier via Random Fourier Features | **49.5%** |
 | MLP | Fully connected | **58.7%** |
-| CNN | Convolutional | **82.2%** |
-| ResNet | Residual connections | Planned |
+| CNN | Convolutional | **87.3%** |
+| ResNet-20 | Residual connections | **89.9%** |
 | Swin Transformer | Shifted-window attention | Planned |
 
 Each model is trained under identical conditions (same data pipeline, optimizer, and metrics) to ensure a fair comparison.
@@ -84,21 +84,38 @@ tensorboard --logdir logs
 - **58.7% exceeds typical MLP benchmarks** (literature: 53–57%), likely due to modern training recipe (AdamW, cosine annealing, weight decay + dropout).
 - 93x more parameters than SVM (+9.2% accuracy) — diminishing returns without spatial inductive bias. The ceiling is the architecture: fully connected layers treat each pixel independently.
 
-### CNN (3-block Conv + BatchNorm) — 50 epochs
+### CNN (3-block Conv + BatchNorm) — 100 epochs, with data augmentation
 
 | Metric | Start | Final |
 | -------- | ------- | ------- |
-| Val accuracy | 53.8% | **82.2%** |
-| Val loss | 1.270 | 0.801 |
-| Train accuracy | 45.3% | 99.7% |
-| Train loss | 1.483 | 0.017 |
-| Overfitting gap | ~0% | 17.5% |
+| Val accuracy | 49.7% | **87.3%** |
+| Val loss | 1.371 | 0.412 |
+| Train accuracy | 40.7% | 92.4% |
+| Train loss | 1.595 | 0.221 |
+| Overfitting gap | ~0% | 5.2% |
 | Trainable params | | 405,898 |
 
-- Best val accuracy at epoch 50 — model was still improving, more epochs or data augmentation could push higher.
-- 17.5% train/val gap shows significant overfitting (train acc 99.7%).
-- **82.2% with 10x fewer params than MLP** (406K vs 3.8M) — spatial inductive bias (local connectivity, parameter sharing, translation equivariance) dominates brute-force fully connected layers.
+- Standard CIFAR-10 augmentation (random horizontal flip + random crop with 4px padding) added for all conv models.
+- **+5.1% over no-augmentation run** (82.2% → 87.3%) — same model, same params, just more diverse training data.
+- Overfitting crushed from 17.5% to 5.2% — augmentation prevents the model from memorizing the training set.
+- **87.3% with 10x fewer params than MLP** (406K vs 3.8M) — spatial inductive bias dominates brute-force fully connected layers.
 - The ceiling is now depth: stacking more conv layers causes vanishing gradients without skip connections.
+
+### ResNet-20 — early stopped at 123 epochs, with data augmentation
+
+| Metric | Start | Final |
+| -------- | ------- | ------- |
+| Val accuracy | 57.1% | **89.9%** |
+| Val loss | 1.180 | 0.540 |
+| Train accuracy | 46.9% | 99.0% |
+| Train loss | 1.443 | 0.030 |
+| Overfitting gap | ~0% | 9.6% |
+| Trainable params | | 272,474 |
+
+- Early stopping triggered at epoch 123 (best at 107, patience 15).
+- **+2.6% over CNN with 33% fewer params** (272K vs 406K) — skip connections enable more efficient learning, not just deeper networks.
+- 9.6% overfitting gap — higher than CNN (5.2%) because ResNet's deeper architecture has more capacity to memorize.
+- **89.9% is close to the original paper's 91.25%** — the gap is likely due to Adam vs SGD with momentum (ResNets historically prefer SGD).
 
 ## Tech Stack
 

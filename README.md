@@ -8,7 +8,7 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 |-------|----------|--------|
 | SVM (RBF Kernel) | Baseline classifier via Random Fourier Features | **49.5%** |
 | MLP | Fully connected | **58.7%** |
-| CNN | Convolutional | Planned |
+| CNN | Convolutional | **82.2%** |
 | ResNet | Residual connections | Planned |
 | Swin Transformer | Shifted-window attention | Planned |
 
@@ -31,17 +31,17 @@ Each model is trained under identical conditions (same data pipeline, optimizer,
 ```bash
 conda create -n cifar10-evo python=3.11 -y
 conda activate cifar10-evo
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
+python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+python -m pip install -r requirements.txt
 ```
 
 ## Usage
 
 ```bash
-python train.py                                     # train from scratch, 20 epochs
-python train.py --max-epochs 50                     # custom epoch count
-python train.py --ckpt last                         # resume from last checkpoint
-python train.py --ckpt checkpoints/svm/X.ckpt --max-epochs 100
+python train.py --model svm                         # train SVM from scratch
+python train.py --model mlp --max-epochs 200        # train MLP for 200 epochs
+python train.py --model cnn --ckpt last             # resume CNN from last checkpoint
+python train.py --model mlp --ckpt last --max-epochs 300
 ```
 
 TensorBoard logs are written to `./logs/`. To visualize:
@@ -83,6 +83,22 @@ tensorboard --logdir logs
 - 32% train/val gap shows severe overfitting: the model memorizes training data but can't generalize.
 - **58.7% exceeds typical MLP benchmarks** (literature: 53–57%), likely due to modern training recipe (AdamW, cosine annealing, weight decay + dropout).
 - 93x more parameters than SVM (+9.2% accuracy) — diminishing returns without spatial inductive bias. The ceiling is the architecture: fully connected layers treat each pixel independently.
+
+### CNN (3-block Conv + BatchNorm) — 50 epochs
+
+| Metric | Start | Final |
+| -------- | ------- | ------- |
+| Val accuracy | 53.8% | **82.2%** |
+| Val loss | 1.270 | 0.801 |
+| Train accuracy | 45.3% | 99.7% |
+| Train loss | 1.483 | 0.017 |
+| Overfitting gap | ~0% | 17.5% |
+| Trainable params | | 405,898 |
+
+- Best val accuracy at epoch 50 — model was still improving, more epochs or data augmentation could push higher.
+- 17.5% train/val gap shows significant overfitting (train acc 99.7%).
+- **82.2% with 10x fewer params than MLP** (406K vs 3.8M) — spatial inductive bias (local connectivity, parameter sharing, translation equivariance) dominates brute-force fully connected layers.
+- The ceiling is now depth: stacking more conv layers causes vanishing gradients without skip connections.
 
 ## Tech Stack
 

@@ -27,6 +27,7 @@ from core.data_module import CIFAR10DataModule
 from core.lightning_module import CIFAR10LitModule
 from models.svm import SVM
 from models.mlp import MLP
+from models.cnn import CNN
 
 # ======================================================================
 # Model registry — maps CLI name to (model, criterion, flatten flag)
@@ -41,6 +42,12 @@ MODELS: dict[str, dict] = {
         "model": lambda: MLP(input_dim=3072, num_classes=10),
         "criterion": nn.CrossEntropyLoss,
         "flatten": True,
+        "weight_decay": 1e-4,
+    },
+    "cnn": {
+        "model": lambda: CNN(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
         "weight_decay": 1e-4,
     },
 }

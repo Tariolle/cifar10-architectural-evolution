@@ -18,10 +18,12 @@ class CIFAR10LitModule(pl.LightningModule):
         model: nn.Module,
         criterion: nn.Module | None = None,
         lr: float = 1e-3,
+        weight_decay: float = 0.0,
     ) -> None:
         super().__init__()
         self.model = torch.compile(model)
         self.lr = lr
+        self.weight_decay = weight_decay
         self.criterion = criterion or nn.CrossEntropyLoss()
 
         # Top-1 accuracy trackers (one per phase to avoid metric leakage)
@@ -69,4 +71,4 @@ class CIFAR10LitModule(pl.LightningModule):
         self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
+        return torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)

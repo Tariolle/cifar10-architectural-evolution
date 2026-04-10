@@ -15,6 +15,7 @@ import warnings
 logging.getLogger("torch.utils.flop_counter").setLevel(logging.ERROR)
 logging.getLogger("pytorch_lightning.utilities.rank_zero").setLevel(logging.WARNING)
 warnings.filterwarnings("ignore", message=".*LeafSpec.*is deprecated.*")
+warnings.filterwarnings("ignore", message=".*does not have many workers.*")
 
 import torch.nn as nn
 import pytorch_lightning as pl
@@ -40,6 +41,7 @@ MODELS: dict[str, dict] = {
         "model": lambda: MLP(input_dim=3072, num_classes=10),
         "criterion": nn.CrossEntropyLoss,
         "flatten": True,
+        "weight_decay": 1e-4,
     },
 }
 
@@ -66,6 +68,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", type=str, required=True, choices=MODELS.keys(),
                         help="Model architecture to train")
     parser.add_argument("--max-epochs", type=int, default=200)
+    parser.add_argument("--weight-decay", type=float, default=None,
+                        help="AdamW weight decay (default: per-model or 0)")
     parser.add_argument("--ckpt", type=str, default=None,
                         help='Path to checkpoint, or "last" to resume from last.ckpt')
     return parser.parse_args()
@@ -94,7 +98,8 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Lightning wrapper
     # ------------------------------------------------------------------
-    lit_module = CIFAR10LitModule(model=model, criterion=criterion, lr=1e-3)
+    weight_decay = args.weight_decay if args.weight_decay is not None else config.get("weight_decay", 0.0)
+    lit_module = CIFAR10LitModule(model=model, criterion=criterion, lr=1e-3, weight_decay=weight_decay)
 
     # ------------------------------------------------------------------
     # TensorBoard logger  (events written to ./logs/<model>/)

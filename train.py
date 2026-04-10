@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore", message=".*does not have many workers.*")
 import torch.nn as nn
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint, RichProgressBar
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from core.data_module import CIFAR10DataModule
@@ -117,13 +117,19 @@ def main() -> None:
         save_last=True,
     )
 
+    early_stop_cb = EarlyStopping(
+        monitor="val/acc",
+        patience=15,
+        mode="max",
+    )
+
     # ------------------------------------------------------------------
     # Trainer
     # ------------------------------------------------------------------
     trainer = Trainer(
         max_epochs=args.max_epochs,
         logger=logger,
-        callbacks=[checkpoint_cb, RichProgressBar(), TrainingETA()],
+        callbacks=[checkpoint_cb, early_stop_cb, RichProgressBar(), TrainingETA()],
         accelerator="auto",
         devices=1,
     )

@@ -70,5 +70,7 @@ class CIFAR10LitModule(pl.LightningModule):
         self.log("val/loss", loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+    def configure_optimizers(self) -> dict:
+        optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.trainer.max_epochs)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}

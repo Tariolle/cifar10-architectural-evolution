@@ -7,7 +7,7 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 | Model | Paradigm | Status |
 |-------|----------|--------|
 | SVM (RBF Kernel) | Baseline classifier via Random Fourier Features | **49.5%** |
-| MLP | Fully connected | Planned |
+| MLP | Fully connected | **58.7%** |
 | CNN | Convolutional | Planned |
 | ResNet | Residual connections | Planned |
 | Swin Transformer | Shifted-window attention | Planned |
@@ -67,6 +67,22 @@ tensorboard --logdir logs
 - 7% train/val gap indicates mild overfitting — the fixed RFF features can't generalize beyond ~50%.
 - **49.5% matches the literature** for RBF kernel SVM on raw CIFAR-10 pixels (expected: 50–55%).
 - The ceiling is the representation: fixed random projections cannot capture spatial structure in images.
+
+### MLP (3-layer FC) — early stopped at 95 epochs
+
+| Metric | Start | Final |
+| -------- | ------- | ------- |
+| Val accuracy | ~46% | **58.7%** |
+| Val loss | ~1.56 | 1.844 |
+| Train accuracy | ~37% | 91.1% |
+| Train loss | ~1.76 | 0.254 |
+| Overfitting gap | ~0% | 32.4% |
+| Trainable params | | 3,805,450 |
+
+- Early stopping triggered (patience=15 on val/acc) — val accuracy plateaued around epoch 80.
+- 32% train/val gap shows severe overfitting: the model memorizes training data but can't generalize.
+- **58.7% exceeds typical MLP benchmarks** (literature: 53–57%), likely due to modern training recipe (AdamW, cosine annealing, weight decay + dropout).
+- 93x more parameters than SVM (+9.2% accuracy) — diminishing returns without spatial inductive bias. The ceiling is the architecture: fully connected layers treat each pixel independently.
 
 ## Tech Stack
 

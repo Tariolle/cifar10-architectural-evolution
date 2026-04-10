@@ -1,10 +1,10 @@
 """Main entry point for CIFAR-10 architectural evolution experiments.
 
 Usage:
-    python train.py                             # train from scratch, 20 epochs
-    python train.py --max-epochs 50             # train from scratch, 50 epochs
-    python train.py --ckpt last                 # resume from last checkpoint
-    python train.py --ckpt checkpoints/svm/X.ckpt --max-epochs 40
+    python train.py --model svm                     # train SVM from scratch
+    python train.py --model mlp --max-epochs 200    # train MLP for 200 epochs
+    python train.py --model svm --ckpt last         # resume SVM from last checkpoint
+    python train.py --model mlp --ckpt last --max-epochs 300
 """
 
 import argparse
@@ -13,6 +13,7 @@ import time
 import warnings
 
 logging.getLogger("torch.utils.flop_counter").setLevel(logging.ERROR)
+logging.getLogger("pytorch_lightning.utilities.rank_zero").setLevel(logging.WARNING)
 warnings.filterwarnings("ignore", message=".*LeafSpec.*is deprecated.*")
 
 import torch.nn as nn
@@ -24,6 +25,23 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from core.data_module import CIFAR10DataModule
 from core.lightning_module import CIFAR10LitModule
 from models.svm import SVM
+from models.mlp import MLP
+
+# ======================================================================
+# Model registry — maps CLI name to (model, criterion, flatten flag)
+# ======================================================================
+MODELS: dict[str, dict] = {
+    "svm": {
+        "model": lambda: SVM(input_dim=3072, num_classes=10),
+        "criterion": nn.MultiMarginLoss,
+        "flatten": True,
+    },
+    "mlp": {
+        "model": lambda: MLP(input_dim=3072, num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": True,
+    },
+}
 
 
 class TrainingETA(pl.Callback):
@@ -45,7 +63,9 @@ class TrainingETA(pl.Callback):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="CIFAR-10 training")
-    parser.add_argument("--max-epochs", type=int, default=20)
+    parser.add_argument("--model", type=str, required=True, choices=MODELS.keys(),
+                        help="Model architecture to train")
+    parser.add_argument("--max-epochs", type=int, default=200)
     parser.add_argument("--ckpt", type=str, default=None,
                         help='Path to checkpoint, or "last" to resume from last.ckpt')
     return parser.parse_args()
@@ -53,25 +73,23 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    config = MODELS[args.model]
 
     # ------------------------------------------------------------------
     # Data
     # ------------------------------------------------------------------
-    # flatten=True: [B, 3, 32, 32] -> [B, 3072] for the linear SVM
     data_module = CIFAR10DataModule(
         data_dir="./data",
         batch_size=128,
         num_workers=2,
-        flatten=True,
+        flatten=config["flatten"],
     )
 
     # ------------------------------------------------------------------
-    # Model — Linear SVM
+    # Model
     # ------------------------------------------------------------------
-    # Single linear layer: [B, 3072] -> [B, 10]
-    # Trained with multi-class hinge loss (MultiMarginLoss)
-    model = SVM(input_dim=3072, num_classes=10)
-    criterion = nn.MultiMarginLoss()
+    model = config["model"]()
+    criterion = config["criterion"]()
 
     # ------------------------------------------------------------------
     # Lightning wrapper
@@ -79,16 +97,16 @@ def main() -> None:
     lit_module = CIFAR10LitModule(model=model, criterion=criterion, lr=1e-3)
 
     # ------------------------------------------------------------------
-    # TensorBoard logger  (events written to ./logs/cifar10/)
+    # TensorBoard logger  (events written to ./logs/<model>/)
     # ------------------------------------------------------------------
-    logger = TensorBoardLogger(save_dir="./logs", name="cifar10")
+    logger = TensorBoardLogger(save_dir="./logs", name=args.model)
 
     # ------------------------------------------------------------------
-    # Checkpointing
+    # Checkpointing  (saved to ./checkpoints/<model>/)
     # ------------------------------------------------------------------
     checkpoint_cb = ModelCheckpoint(
-        dirpath="./checkpoints/svm",
-        filename="svm-{epoch:02d}-{val/acc:.3f}",
+        dirpath=f"./checkpoints/{args.model}",
+        filename=f"{args.model}-{{epoch:02d}}-{{val/acc:.3f}}",
         monitor="val/acc",
         mode="max",
         save_last=True,

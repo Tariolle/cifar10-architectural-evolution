@@ -17,7 +17,10 @@ logging.getLogger("pytorch_lightning.utilities.rank_zero").setLevel(logging.WARN
 warnings.filterwarnings("ignore", message=".*LeafSpec.*is deprecated.*")
 warnings.filterwarnings("ignore", message=".*does not have many workers.*")
 
+import torch
 import torch.nn as nn
+
+torch.backends.cudnn.benchmark = True
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
@@ -139,6 +142,7 @@ def main() -> None:
         callbacks=[checkpoint_cb, early_stop_cb, RichProgressBar(), TrainingETA()],
         accelerator="auto",
         devices=1,
+        precision="16-mixed",
     )
 
     # ------------------------------------------------------------------

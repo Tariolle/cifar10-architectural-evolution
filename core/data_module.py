@@ -67,28 +67,15 @@ class CIFAR10DataModule(pl.LightningDataModule):
         The official test set is used as the validation set (standard practice
         for CIFAR-10 benchmarks).
 
-        When ``flatten=True``, the entire dataset is preloaded into RAM as
-        tensors so that per-sample transforms and DataLoader worker overhead
-        are paid only once instead of every epoch.
+        The entire dataset is preloaded into RAM as tensors so that per-sample
+        transforms and DataLoader worker overhead are paid only once instead of
+        every epoch.  CIFAR-10 is small enough (~180 MB) for this to work on
+        any machine.
         """
         if stage in ("fit", None):
-            if self.flatten:
-                self.train_dataset = self._preload_as_tensors(train=True)
-                self.val_dataset = self._preload_as_tensors(train=False)
-                self.num_workers = 0
-            else:
-                self.train_dataset = CIFAR10(
-                    root=self.data_dir,
-                    train=True,
-                    download=True,
-                    transform=self.transform,
-                )
-                self.val_dataset = CIFAR10(
-                    root=self.data_dir,
-                    train=False,
-                    download=True,
-                    transform=self.transform,
-                )
+            self.train_dataset = self._preload_as_tensors(train=True)
+            self.val_dataset = self._preload_as_tensors(train=False)
+            self.num_workers = 0
 
     def train_dataloader(self) -> DataLoader:
         assert self.train_dataset is not None, "Call setup('fit') first."

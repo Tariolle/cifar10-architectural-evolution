@@ -58,6 +58,13 @@ MODELS: dict[str, dict] = {
         "weight_decay": 1e-4,
         "augment": True,
     },
+    "tiny-cnn": {
+        "model": lambda: TinyCNN(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 1e-4,
+        "augment": True,
+    },
     "resnet": {
         "model": lambda: ResNet20(num_classes=10),
         "criterion": nn.CrossEntropyLoss,

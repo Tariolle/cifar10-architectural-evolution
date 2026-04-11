@@ -78,13 +78,13 @@ ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewe
 
 ### Knowledge distillation (teacher: ResNet-20)
 
-| Student | Params | Baseline | Distilled | Overfit Gap |
-|---------|--------|----------|-----------|-------------|
-| TinyCNN | 56K | — | **81.7%** | -0.6% |
-| CNN | 406K | 87.3% | *pending* | |
-| MLP | 3.8M | 58.7% | *pending* | |
+| Student | Params | Baseline | Distilled | Delta |
+|---------|--------|----------|-----------|-------|
+| MLP | 3.8M | 55.3% | **59.2%** | **+3.9%** |
+| TinyCNN | 56K | 81.3% | **81.7%** | +0.4% |
+| CNN | 406K | 87.3% | **87.3%** | 0% |
 
-Teacher logits are precomputed once (`--precompute-teacher`) and reused across all students — no teacher in GPU memory during training. Soft labels nearly eliminate overfitting: TinyCNN achieves 81.7% with 56K params and zero overfit gap.
+Teacher logits are precomputed once (`--precompute-teacher`) and reused across all students — no teacher in GPU memory during training. Distillation only helps the MLP meaningfully: the teacher's spatial knowledge raises the train ceiling by 19%, and +3.9% transfers to validation. Conv-based students already have the right inductive bias — soft labels from a slightly better teacher can't break their architectural ceiling.
 
 ## Project Structure
 

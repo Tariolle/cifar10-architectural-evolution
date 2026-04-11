@@ -76,6 +76,16 @@ ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewe
 - This matches independent benchmarks: Swin from scratch with basic augmentation reaches 86–90% on CIFAR-10. The 90%+ results in the literature use RandAugment, CutMix, or pretraining.
 </details>
 
+### Knowledge distillation (teacher: ResNet-20)
+
+| Student | Params | Baseline | Distilled | Overfit Gap |
+|---------|--------|----------|-----------|-------------|
+| TinyCNN | 56K | — | **81.7%** | -0.6% |
+| CNN | 406K | 87.3% | *pending* | |
+| MLP | 3.8M | 58.7% | *pending* | |
+
+Teacher logits are precomputed once (`--precompute-teacher`) and reused across all students — no teacher in GPU memory during training. Soft labels nearly eliminate overfitting: TinyCNN achieves 81.7% with 56K params and zero overfit gap.
+
 ## Project Structure
 
 ```

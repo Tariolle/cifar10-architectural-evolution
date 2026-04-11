@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import torch
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 
@@ -12,6 +12,21 @@ from torchvision.datasets import CIFAR10
 def _flatten_image(x: torch.Tensor) -> torch.Tensor:
     """[3, 32, 32] -> [3072]. Module-level function so it's picklable on Windows."""
     return x.view(-1)
+
+
+class _WithTeacherLogits(Dataset):
+    """Wraps a dataset to also return precomputed teacher logits by index."""
+
+    def __init__(self, dataset: Dataset, logits: torch.Tensor) -> None:
+        self.dataset = dataset
+        self.logits = logits
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, idx: int) -> tuple:
+        x, y = self.dataset[idx]
+        return x, y, self.logits[idx]
 
 
 class CIFAR10DataModule(pl.LightningDataModule):
@@ -37,6 +52,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
         num_workers: int = 2,
         flatten: bool = False,
         augment: bool = False,
+        teacher_logits_path: str | None = None,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
@@ -44,6 +60,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.flatten = flatten
         self.augment = augment
+        self.teacher_logits = torch.load(teacher_logits_path, map_location="cpu", weights_only=True) if teacher_logits_path else None
 
         # --- Val/test transform (no augmentation) ---
         # PIL Image (32x32 RGB) -> [3, 32, 32] float32 in [-1, 1]
@@ -95,6 +112,10 @@ class CIFAR10DataModule(pl.LightningDataModule):
                 self.train_dataset = self._preload_as_tensors(train=True)
                 self.val_dataset = self._preload_as_tensors(train=False)
                 self.num_workers = 0
+
+            # Attach precomputed teacher logits (for distillation)
+            if self.teacher_logits is not None:
+                self.train_dataset = _WithTeacherLogits(self.train_dataset, self.teacher_logits)
 
     def train_dataloader(self) -> DataLoader:
         assert self.train_dataset is not None, "Call setup('fit') first."

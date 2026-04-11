@@ -35,6 +35,7 @@ from models.cnn import CNN
 from models.tiny_cnn import TinyCNN
 from models.resnet import ResNet20
 from models.swin import SwinTransformer
+from models.hybrid import HybridCNNTransformer
 
 # ======================================================================
 # Model registry — maps CLI name to (model, criterion, flatten flag)
@@ -79,6 +80,14 @@ MODELS: dict[str, dict] = {
         "weight_decay": 0.05,
         "augment": True,
         "warmup_epochs": 10,
+    },
+    "hybrid": {
+        "model": lambda: HybridCNNTransformer(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 0.02,
+        "augment": True,
+        "warmup_epochs": 5,
     },
     # ------------------------------------------------------------------
     # Distillation students (teacher: ResNet-20)

@@ -1,6 +1,6 @@
 # CIFAR-10 Architectural Evolution
 
-A comparative study of five model paradigms on CIFAR-10, tracing the evolution from classical linear classifiers to modern vision transformers. All models are trained from scratch under identical conditions (same data pipeline, AdamW optimizer, cosine annealing LR) with architecture-appropriate regularization.
+A comparative study of six model paradigms on CIFAR-10, tracing the evolution from classical linear classifiers to modern vision transformers and hybrids. All models are trained from scratch under identical conditions (same data pipeline, AdamW optimizer, cosine annealing LR) with architecture-appropriate regularization.
 
 ## Results
 
@@ -11,6 +11,7 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 | CNN (3-block Conv) | 406K | **87.3%** | 92.4% | 5.2% | 100 |
 | ResNet-20 | 272K | **89.9%** | 99.0% | 9.6% | 123* |
 | Swin Transformer | 5.4M | **86.6%** | 96.7% | 10.1% | 117* |
+| Hybrid CNN-Transformer | 1.16M | **90.4%** | 99.6% | 9.2% | 133* |
 
 \* Early stopped (patience=15 on val/acc).
 
@@ -24,7 +25,7 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 | ResNet-20 | 41.8M | 2.8ms | 2.15 |
 | Swin | 133.5M | 10.2ms | 0.65 |
 
-ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewer FLOPs than Swin. The MLP has the best accuracy-per-FLOP ratio — but only because it computes almost nothing (and generalizes poorly). Swin's attention mechanism is 3.3x more expensive than convolutions for the same spatial resolution, yet delivers worse accuracy on this dataset.
+The Hybrid achieves the best accuracy (90.4%) with 4.7x fewer params than Swin. ResNet-20 remains the efficiency king — nearly matching the Hybrid's accuracy with 4.3x fewer params. The MLP has the best accuracy-per-FLOP ratio — but only because it computes almost nothing (and generalizes poorly).
 
 ### Key findings
 
@@ -32,6 +33,7 @@ ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewe
 2. **MLP → CNN (+28.6%)**: The biggest jump. Spatial inductive bias (local connectivity, weight sharing) achieves 87% with 10x fewer params than the MLP.
 3. **CNN → ResNet (+2.6%)**: Skip connections enable deeper, more efficient learning with 33% fewer params. Close to the original paper's 91.25% (gap likely due to AdamW vs SGD).
 4. **ResNet → Swin (-3.3%)**: The surprise. 20x more parameters and a more expressive architecture *loses* to ResNet. On 50K 32x32 images, there isn't enough data for transformers to learn the spatial structure that convolutions get for free. With aggressive augmentation (RandAugment, CutMix) or pretraining, Swin reaches 90–97% on CIFAR-10 — but under a fair, uniform training recipe, convolutions win.
+5. **Hybrid (+0.5% over ResNet)**: Conv early stages + Swin late stages gets the best of both worlds. Convolutions extract local features cheaply (no need to learn spatial bias), then attention reasons globally over those features. 90.4% with 1.16M params — 4.3x larger than ResNet but 4.7x smaller than Swin.
 
 ### Per-model details
 
@@ -74,6 +76,16 @@ ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewe
 - Transformer-specific training: 10-epoch linear LR warmup, weight_decay=0.05 (vs 1e-4 for CNNs), stochastic depth 0.1.
 - 86.6% with 20x more params than ResNet — transformers lack the spatial inductive bias that makes convolutions efficient on small images.
 - This matches independent benchmarks: Swin from scratch with basic augmentation reaches 86–90% on CIFAR-10. The 90%+ results in the literature use RandAugment, CutMix, or pretraining.
+</details>
+
+<details>
+<summary>Hybrid CNN-Transformer — early stopped at ~133 epochs, with data augmentation</summary>
+
+- Conv backbone: 64-channel stem + 2 BasicBlocks (GELU) at 32x32 + stride-2 downsample to 16x16. Reuses ResNet's `BasicBlock`.
+- Transformer backbone: 2 Swin blocks at 16x16 + PatchMerging + 4 Swin blocks at 8x8. Reuses Swin's `SwinStage`.
+- Transition: reshape + LayerNorm (conv's 64 channels = transformer's 64-dim embeddings, no projection needed).
+- Training: weight_decay=0.02, 5-epoch LR warmup — between ResNet's and Swin's settings.
+- 90.4% with 1.16M params — conv extracts local features cheaply, attention reasons globally. Best of both worlds.
 </details>
 
 ### Knowledge distillation (teacher: ResNet-20)

@@ -16,6 +16,7 @@ from models.mlp import MLP
 from models.cnn import CNN
 from models.resnet import ResNet20
 from models.swin import SwinTransformer
+from models.hybrid import HybridCNNTransformer
 from utils.metrics_tracker import count_parameters, count_flops
 
 MODELS = {
@@ -24,6 +25,7 @@ MODELS = {
     "CNN": (CNN(num_classes=10), torch.randn(1, 3, 32, 32)),
     "ResNet-20": (ResNet20(num_classes=10), torch.randn(1, 3, 32, 32)),
     "Swin": (SwinTransformer(num_classes=10), torch.randn(1, 3, 32, 32)),
+    "Hybrid": (HybridCNNTransformer(num_classes=10), torch.randn(1, 3, 32, 32)),
 }
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -69,7 +71,7 @@ def main() -> None:
 
     # Best val accuracies from training
     accuracies = {
-        "SVM": 49.5, "MLP": 58.7, "CNN": 87.3, "ResNet-20": 89.9, "Swin": 86.6,
+        "SVM": 49.5, "MLP": 58.7, "CNN": 87.3, "ResNet-20": 89.9, "Swin": 86.6, "Hybrid": 90.4,
     }
 
     for name, (model, sample) in MODELS.items():

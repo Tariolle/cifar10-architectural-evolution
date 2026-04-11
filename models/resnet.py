@@ -13,14 +13,21 @@ import torch.nn.functional as F
 
 
 class BasicBlock(nn.Module):
-    """Pre-activation-free residual block: conv -> BN -> ReLU -> conv -> BN + skip."""
+    """Pre-activation-free residual block: conv -> BN -> act -> conv -> BN + skip."""
 
-    def __init__(self, in_channels: int, out_channels: int, stride: int = 1) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        act_layer: type[nn.Module] = nn.ReLU,
+    ) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, 3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.conv2 = nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(out_channels)
+        self.act = act_layer()
 
         # Shortcut for dimension mismatch (channel increase or spatial downsample)
         self.shortcut: nn.Module = nn.Identity()
@@ -31,9 +38,9 @@ class BasicBlock(nn.Module):
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.act(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
-        return F.relu(out + self.shortcut(x))
+        return self.act(out + self.shortcut(x))
 
 
 class ResNet20(nn.Module):

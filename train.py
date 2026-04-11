@@ -32,6 +32,7 @@ from models.svm import SVM
 from models.mlp import MLP
 from models.cnn import CNN
 from models.resnet import ResNet20
+from models.swin import SwinTransformer
 
 # ======================================================================
 # Model registry — maps CLI name to (model, criterion, flatten flag)
@@ -61,6 +62,14 @@ MODELS: dict[str, dict] = {
         "flatten": False,
         "weight_decay": 1e-4,
         "augment": True,
+    },
+    "swin": {
+        "model": lambda: SwinTransformer(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 0.05,
+        "augment": True,
+        "warmup_epochs": 10,
     },
 }
 
@@ -119,7 +128,11 @@ def main() -> None:
     # Lightning wrapper
     # ------------------------------------------------------------------
     weight_decay = args.weight_decay if args.weight_decay is not None else config.get("weight_decay", 0.0)
-    lit_module = CIFAR10LitModule(model=model, criterion=criterion, lr=1e-3, weight_decay=weight_decay)
+    warmup_epochs = config.get("warmup_epochs", 0)
+    lit_module = CIFAR10LitModule(
+        model=model, criterion=criterion, lr=1e-3,
+        weight_decay=weight_decay, warmup_epochs=warmup_epochs,
+    )
 
     # ------------------------------------------------------------------
     # TensorBoard logger  (events written to ./logs/<model>/)

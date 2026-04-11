@@ -19,11 +19,13 @@ class CIFAR10LitModule(pl.LightningModule):
         criterion: nn.Module | None = None,
         lr: float = 1e-3,
         weight_decay: float = 0.0,
+        warmup_epochs: int = 0,
     ) -> None:
         super().__init__()
         self.model = torch.compile(model)
         self.lr = lr
         self.weight_decay = weight_decay
+        self.warmup_epochs = warmup_epochs
         self.criterion = criterion or nn.CrossEntropyLoss()
 
         # Top-1 accuracy trackers (one per phase to avoid metric leakage)
@@ -72,5 +74,20 @@ class CIFAR10LitModule(pl.LightningModule):
 
     def configure_optimizers(self) -> dict:
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.trainer.max_epochs)
+
+        if self.warmup_epochs > 0:
+            warmup = torch.optim.lr_scheduler.LinearLR(
+                optimizer, start_factor=1e-3, total_iters=self.warmup_epochs,
+            )
+            cosine = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=self.trainer.max_epochs - self.warmup_epochs,
+            )
+            scheduler = torch.optim.lr_scheduler.SequentialLR(
+                optimizer, schedulers=[warmup, cosine], milestones=[self.warmup_epochs],
+            )
+        else:
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=self.trainer.max_epochs,
+            )
+
         return {"optimizer": optimizer, "lr_scheduler": scheduler}

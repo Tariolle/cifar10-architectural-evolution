@@ -14,6 +14,18 @@ A comparative study of five model paradigms on CIFAR-10, tracing the evolution f
 
 \* Early stopped (patience=15 on val/acc).
 
+### Efficiency (RTX 2060 SUPER, batch=128, FP16)
+
+| Model | FLOPs | ms/batch | Acc/MFLOP |
+|-------|-------|----------|-----------|
+| SVM | 12.6M | 0.4ms | 3.92 |
+| MLP | 3.8M | 0.3ms | 15.43 |
+| CNN | 40.1M | 1.6ms | 2.18 |
+| ResNet-20 | 41.8M | 2.8ms | 2.15 |
+| Swin | 133.5M | 10.2ms | 0.65 |
+
+ResNet-20 achieves the best accuracy while being 3.6x faster and using 3.2x fewer FLOPs than Swin. The MLP has the best accuracy-per-FLOP ratio — but only because it computes almost nothing (and generalizes poorly). Swin's attention mechanism is 3.3x more expensive than convolutions for the same spatial resolution, yet delivers worse accuracy on this dataset.
+
 ### Key findings
 
 1. **SVM → MLP (+9.2%)**: 93x more parameters buy marginal gains. Without spatial awareness, fully connected layers memorize rather than generalize (32% overfit gap).

@@ -17,6 +17,7 @@ from models.cnn import CNN
 from models.resnet import ResNet20
 from models.swin import SwinTransformer
 from models.hybrid import HybridCNNTransformer
+from models.pretrained import pretrained_resnet18, pretrained_swin_t
 from utils.metrics_tracker import count_parameters, count_flops
 
 MODELS = {
@@ -26,6 +27,9 @@ MODELS = {
     "ResNet-20": (ResNet20(num_classes=10), torch.randn(1, 3, 32, 32)),
     "Swin": (SwinTransformer(num_classes=10), torch.randn(1, 3, 32, 32)),
     "Hybrid": (HybridCNNTransformer(num_classes=10), torch.randn(1, 3, 32, 32)),
+    # Pretrained models operate at their native 224x224 resolution
+    "ResNet-18*": (pretrained_resnet18(num_classes=10), torch.randn(1, 3, 224, 224)),
+    "Swin-T*": (pretrained_swin_t(num_classes=10), torch.randn(1, 3, 224, 224)),
 }
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -72,6 +76,7 @@ def main() -> None:
     # Best val accuracies from training
     accuracies = {
         "SVM": 49.5, "MLP": 58.7, "CNN": 87.3, "ResNet-20": 89.9, "Swin": 86.6, "Hybrid": 90.4,
+        "ResNet-18*": 96.6, "Swin-T*": 97.4,
     }
 
     for name, (model, sample) in MODELS.items():

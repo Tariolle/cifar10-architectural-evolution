@@ -1,8 +1,10 @@
 # CIFAR-10 Architectural Evolution
 
-A comparative study of six model paradigms on CIFAR-10, tracing the evolution from classical linear classifiers to modern vision transformers and hybrids. All models are trained from scratch under identical conditions (same data pipeline, AdamW optimizer, cosine annealing LR) with architecture-appropriate regularization.
+A comparative study of CIFAR-10 architectures, tracing the evolution from classical linear classifiers through modern vision transformers, hybrids, and ImageNet-pretrained transfer learning. From-scratch models are trained under identical conditions (same data pipeline, AdamW optimizer, cosine annealing LR) with architecture-appropriate regularization.
 
 ## Results
+
+### From scratch (32x32, 50K images)
 
 | Model | Params | Val Acc | Train Acc | Overfit Gap | Epochs |
 |-------|--------|---------|-----------|-------------|--------|
@@ -13,6 +15,13 @@ A comparative study of six model paradigms on CIFAR-10, tracing the evolution fr
 | Swin Transformer | 5.4M | **86.6%** | 96.7% | 10.1% | 117* |
 | Hybrid CNN-Transformer | 1.16M | **90.4%** | 99.6% | 9.2% | 133* |
 
+### Transfer learning (ImageNet pretrained, fine-tuned at 224x224)
+
+| Model | Params | Val Acc | Train Acc | Epochs |
+|-------|--------|---------|-----------|--------|
+| ResNet-18 (ImageNet) | 11.2M | **96.6%** | 100.0% | 50 |
+| Swin-T (ImageNet) | 27.5M | **97.4%** | 99.5% | 32 |
+
 \* Early stopped (patience=15 on val/acc).
 
 ### Efficiency (RTX 2060 SUPER, batch=128, FP16)
@@ -20,12 +29,15 @@ A comparative study of six model paradigms on CIFAR-10, tracing the evolution fr
 | Model | FLOPs | ms/batch | Acc/MFLOP |
 |-------|-------|----------|-----------|
 | SVM | 12.6M | 0.4ms | 3.92 |
-| MLP | 3.8M | 0.3ms | 15.43 |
+| MLP | 3.8M | 0.6ms | 15.43 |
 | CNN | 40.1M | 1.6ms | 2.18 |
-| ResNet-20 | 41.8M | 2.8ms | 2.15 |
-| Swin | 133.5M | 10.2ms | 0.65 |
+| ResNet-20 | 41.8M | 4.4ms | 2.15 |
+| Swin | 133.5M | 10.4ms | 0.65 |
+| Hybrid | 255.1M | 13.6ms | 0.35 |
+| ResNet-18 (pretrained, 224x224) | 1.83G | 38.6ms | 0.05 |
+| Swin-T (pretrained, 224x224) | 4.51G | 182.9ms | 0.02 |
 
-The Hybrid achieves the best accuracy (90.4%) with 4.7x fewer params than Swin. ResNet-20 remains the efficiency king — nearly matching the Hybrid's accuracy with 4.3x fewer params. The MLP has the best accuracy-per-FLOP ratio — but only because it computes almost nothing (and generalizes poorly).
+Among from-scratch models, ResNet-20 remains the efficiency king — the Hybrid's +0.5% accuracy costs it 6x more FLOPs. Pretrained models win on accuracy but pay a steep cost: pretrained Swin-T uses **108x more FLOPs** than ResNet-20 and is **42x slower** per batch — for a +7.5% accuracy gain. Pretrained ResNet-18 is more practical: **44x more FLOPs** and **8.8x slower** for +6.7%. If you only need good accuracy on small images, from-scratch ResNet-20 still delivers >90% of the ceiling at a fraction of the cost.
 
 ### Key findings
 
@@ -34,6 +46,7 @@ The Hybrid achieves the best accuracy (90.4%) with 4.7x fewer params than Swin. 
 3. **CNN → ResNet (+2.6%)**: Skip connections enable deeper, more efficient learning with 33% fewer params. Close to the original paper's 91.25% (gap likely due to AdamW vs SGD).
 4. **ResNet → Swin (-3.3%)**: The surprise. 20x more parameters and a more expressive architecture *loses* to ResNet. On 50K 32x32 images, there isn't enough data for transformers to learn the spatial structure that convolutions get for free. With aggressive augmentation (RandAugment, CutMix) or pretraining, Swin reaches 90–97% on CIFAR-10 — but under a fair, uniform training recipe, convolutions win.
 5. **Hybrid (+0.5% over ResNet)**: Conv early stages + Swin late stages gets the best of both worlds. Convolutions extract local features cheaply (no need to learn spatial bias), then attention reasons globally over those features. 90.4% with 1.16M params — 4.3x larger than ResNet but 4.7x smaller than Swin.
+6. **Pretraining dominates architecture**: Both pretrained models crush every from-scratch baseline — ResNet-18 (96.6%, +6.2% over best from-scratch) and Swin-T (97.4%, +7.0%). The +10.8% jump from from-scratch Swin (86.6%) to pretrained Swin-T (97.4%) is the vindication: Swin's poor from-scratch performance was a **data problem, not an architecture problem**. Once features are well-trained on ImageNet's 1.2M images, attention's global receptive field edges out convolutions by +0.8% (Swin-T over ResNet-18). The from-scratch conclusion reverses: **with enough data, transformers catch up; without it, convolutions win**.
 
 ### Per-model details
 
@@ -86,6 +99,24 @@ The Hybrid achieves the best accuracy (90.4%) with 4.7x fewer params than Swin. 
 - Transition: reshape + LayerNorm (conv's 64 channels = transformer's 64-dim embeddings, no projection needed).
 - Training: weight_decay=0.02, 5-epoch LR warmup — between ResNet's and Swin's settings.
 - 90.4% with 1.16M params — conv extracts local features cheaply, attention reasons globally. Best of both worlds.
+</details>
+
+<details>
+<summary>Pretrained ResNet-18 (ImageNet → CIFAR-10) — 50 epochs, fine-tuned at 224x224</summary>
+
+- Torchvision ResNet-18 with `IMAGENET1K_V1` weights. Head replaced: `Linear(512, 10)`.
+- CIFAR-10 upsampled to 224x224 with ImageNet normalization (0.485,0.456,0.406 / 0.229,0.224,0.225).
+- Full fine-tuning (no layer freezing): lr=1e-4, weight_decay=1e-4, 3-epoch warmup.
+- 96.6% val acc — already hits 91.7% after just 2 epochs, versus 123 epochs for ResNet-20 from scratch to reach 89.9%.
+</details>
+
+<details>
+<summary>Pretrained Swin-T (ImageNet → CIFAR-10) — 32 epochs, fine-tuned at 224x224</summary>
+
+- Torchvision Swin-T with `IMAGENET1K_V1` weights. Head replaced: `Linear(768, 10)`.
+- Same preprocessing as pretrained ResNet-18. Training: lr=1e-4, weight_decay=0.05, 5-epoch warmup, batch_size=64 (fits on 8GB GPU at 224x224).
+- 97.4% val acc — a **+10.8% jump** from the 86.6% from-scratch Swin. The architecture was never the problem, the data was.
+- Beats pretrained ResNet-18 by +0.8%: with sufficient features, attention's global receptive field finally pays off. The from-scratch conclusion (convs > transformers) reverses with enough data.
 </details>
 
 ### Knowledge distillation (teacher: ResNet-20)

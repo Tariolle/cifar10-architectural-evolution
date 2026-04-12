@@ -44,6 +44,8 @@ class CIFAR10DataModule(pl.LightningDataModule):
 
     MEAN: tuple[float, float, float] = (0.5, 0.5, 0.5)
     STD: tuple[float, float, float] = (0.5, 0.5, 0.5)
+    IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
+    IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
     def __init__(
         self,
@@ -53,6 +55,8 @@ class CIFAR10DataModule(pl.LightningDataModule):
         flatten: bool = False,
         augment: bool = False,
         teacher_logits_path: str | None = None,
+        image_size: int | None = None,
+        imagenet_norm: bool = False,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
@@ -62,11 +66,18 @@ class CIFAR10DataModule(pl.LightningDataModule):
         self.augment = augment
         self.teacher_logits = torch.load(teacher_logits_path, map_location="cpu", weights_only=True) if teacher_logits_path else None
 
+        mean = self.IMAGENET_MEAN if imagenet_norm else self.MEAN
+        std = self.IMAGENET_STD if imagenet_norm else self.STD
+        crop_size = image_size or 32
+        crop_padding = crop_size // 8  # 4px at 32, 28px at 224
+
         # --- Val/test transform (no augmentation) ---
-        # PIL Image (32x32 RGB) -> [3, 32, 32] float32 in [-1, 1]
-        val_transforms: list = [
+        val_transforms: list = []
+        if image_size:
+            val_transforms.append(transforms.Resize(image_size))
+        val_transforms += [
             transforms.ToTensor(),
-            transforms.Normalize(self.MEAN, self.STD),
+            transforms.Normalize(mean, std),
         ]
         if self.flatten:
             val_transforms.append(transforms.Lambda(_flatten_image))
@@ -74,14 +85,16 @@ class CIFAR10DataModule(pl.LightningDataModule):
 
         # --- Train transform (with optional augmentation) ---
         if self.augment:
-            # RandomCrop(32, padding=4): pad 4px on each side, crop back to 32x32
-            # RandomHorizontalFlip: 50% chance to flip
-            self.train_transform = transforms.Compose([
+            train_transforms: list = []
+            if image_size:
+                train_transforms.append(transforms.Resize(image_size))
+            train_transforms += [
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(32, padding=4),
+                transforms.RandomCrop(crop_size, padding=crop_padding),
                 transforms.ToTensor(),
-                transforms.Normalize(self.MEAN, self.STD),
-            ])
+                transforms.Normalize(mean, std),
+            ]
+            self.train_transform = transforms.Compose(train_transforms)
         else:
             self.train_transform = self.val_transform
 

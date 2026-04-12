@@ -36,6 +36,7 @@ from models.tiny_cnn import TinyCNN
 from models.resnet import ResNet20
 from models.swin import SwinTransformer
 from models.hybrid import HybridCNNTransformer
+from models.pretrained import pretrained_resnet18, pretrained_swin_t
 
 # ======================================================================
 # Model registry — maps CLI name to (model, criterion, flatten flag)
@@ -88,6 +89,32 @@ MODELS: dict[str, dict] = {
         "weight_decay": 0.02,
         "augment": True,
         "warmup_epochs": 5,
+    },
+    # ------------------------------------------------------------------
+    # Pretrained (ImageNet transfer learning)
+    # ------------------------------------------------------------------
+    "pretrained-resnet18": {
+        "model": lambda: pretrained_resnet18(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 1e-4,
+        "augment": True,
+        "warmup_epochs": 3,
+        "lr": 1e-4,
+        "image_size": 224,
+        "imagenet_norm": True,
+    },
+    "pretrained-swin-t": {
+        "model": lambda: pretrained_swin_t(num_classes=10),
+        "criterion": nn.CrossEntropyLoss,
+        "flatten": False,
+        "weight_decay": 0.05,
+        "augment": True,
+        "warmup_epochs": 5,
+        "lr": 1e-4,
+        "batch_size": 64,
+        "image_size": 224,
+        "imagenet_norm": True,
     },
     # ------------------------------------------------------------------
     # Distillation students (teacher: ResNet-20)
@@ -214,13 +241,16 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Data
     # ------------------------------------------------------------------
+    batch_size = config.get("batch_size", 128)
     data_module = CIFAR10DataModule(
         data_dir="./data",
-        batch_size=128,
+        batch_size=batch_size,
         num_workers=2,
         flatten=config["flatten"],
         augment=config.get("augment", False),
         teacher_logits_path=args.teacher_logits if is_distill else None,
+        image_size=config.get("image_size"),
+        imagenet_norm=config.get("imagenet_norm", False),
     )
 
     # ------------------------------------------------------------------
@@ -234,16 +264,17 @@ def main() -> None:
     # ------------------------------------------------------------------
     weight_decay = args.weight_decay if args.weight_decay is not None else config.get("weight_decay", 0.0)
     warmup_epochs = config.get("warmup_epochs", 0)
+    lr = config.get("lr", 1e-3)
 
     if is_distill:
         lit_module = DistillationLitModule(
-            student=model, lr=1e-3,
+            student=model, lr=lr,
             weight_decay=weight_decay, warmup_epochs=warmup_epochs,
             flatten_for_student=config.get("flatten_for_student", False),
         )
     else:
         lit_module = CIFAR10LitModule(
-            model=model, criterion=criterion, lr=1e-3,
+            model=model, criterion=criterion, lr=lr,
             weight_decay=weight_decay, warmup_epochs=warmup_epochs,
         )
 

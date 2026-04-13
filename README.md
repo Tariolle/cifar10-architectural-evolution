@@ -1,6 +1,6 @@
 # CIFAR-10 Architectural Evolution
 
-A comparative study of CIFAR-10 architectures, tracing the evolution from classical linear classifiers through modern vision transformers, hybrids, and ImageNet-pretrained transfer learning. From-scratch models are trained under identical conditions (same data pipeline, AdamW optimizer, cosine annealing LR) with architecture-appropriate regularization.
+A comparative study of CIFAR-10 architectures, tracing the evolution from classical linear classifiers through modern vision transformers, hybrids, and ImageNet-pretrained transfer learning. From-scratch models share a common training backbone (same data pipeline, AdamW optimizer, cosine annealing LR), with architecture-appropriate hyperparameters (warmup length, weight decay, stochastic depth). This is not a strictly controlled experiment — each model uses settings suited to its architecture — but results stay within the range reported in the literature for each family.
 
 ## Results
 
@@ -43,7 +43,7 @@ Among from-scratch models, ResNet-20 remains the efficiency king — the Hybrid'
 
 1. **SVM → MLP (+9.2%)**: 93x more parameters buy marginal gains. Without spatial awareness, fully connected layers memorize rather than generalize (32% overfit gap).
 2. **MLP → CNN (+28.6%)**: The biggest jump. Spatial inductive bias (local connectivity, weight sharing) achieves 87% with 10x fewer params than the MLP.
-3. **CNN → ResNet (+2.6%)**: Skip connections enable deeper, more efficient learning with 33% fewer params. Close to the original paper's 91.25% (gap likely due to AdamW vs SGD).
+3. **CNN → ResNet (+2.6%)**: Skip connections enable deeper, more efficient learning with 33% fewer params.
 4. **ResNet → Swin (-3.3%)**: The surprise. 20x more parameters and a more expressive architecture *loses* to ResNet. On 50K 32x32 images, there isn't enough data for transformers to learn the spatial structure that convolutions get for free. With aggressive augmentation (RandAugment, CutMix) or pretraining, Swin reaches 90–97% on CIFAR-10 — but under a fair, uniform training recipe, convolutions win.
 5. **Hybrid (+0.5% over ResNet)**: Conv early stages + Swin late stages gets the best of both worlds. Convolutions extract local features cheaply (no need to learn spatial bias), then attention reasons globally over those features. 90.4% with 1.16M params — 4.3x larger than ResNet but 4.7x smaller than Swin.
 6. **Pretraining dominates architecture**: Both pretrained models crush every from-scratch baseline — ResNet-18 (96.6%, +6.2% over best from-scratch) and Swin-T (97.4%, +7.0%). The +10.8% jump from from-scratch Swin (86.6%) to pretrained Swin-T (97.4%) is the vindication: Swin's poor from-scratch performance was a **data problem, not an architecture problem**. Once features are well-trained on ImageNet's 1.2M images, attention's global receptive field edges out convolutions by +0.8% (Swin-T over ResNet-18). The from-scratch conclusion reverses: **with enough data, transformers catch up; without it, convolutions win**.
@@ -79,7 +79,6 @@ Among from-scratch models, ResNet-20 remains the efficiency king — the Hybrid'
 
 - Architecture follows He et al. (2015): 3 stages of {16, 32, 64} channels, 3 blocks per stage.
 - +2.6% over CNN with 33% fewer params — skip connections enable more efficient learning, not just deeper networks.
-- 89.9% is close to the original paper's 91.25%. The gap is likely due to AdamW vs SGD with momentum.
 </details>
 
 <details>
@@ -155,7 +154,7 @@ python -m pip install -r requirements.txt
 ```bash
 python train.py --model svm                         # train from scratch
 python train.py --model cnn --max-epochs 200        # custom epoch count
-python train.py --model resnet --ckpt last           # resume from last checkpoint
+python train.py --model resnet --ckpt last          # resume from last checkpoint
 ```
 
 TensorBoard logs are written to `./logs/`. To visualize:

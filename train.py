@@ -176,6 +176,12 @@ def parse_args() -> argparse.Namespace:
                         help="Precompute teacher logits from checkpoint and exit")
     parser.add_argument("--teacher-logits", type=str, default="./checkpoints/resnet/teacher_logits.pt",
                         help="Path to precomputed teacher logits (default: resnet)")
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Random seed for reproducibility (drives init, batching, and subset choice)")
+    parser.add_argument("--train-subset", type=int, default=None, metavar="N",
+                        help="Train on a random subset of N samples (data-scaling experiments)")
+    parser.add_argument("--patience", type=int, default=15,
+                        help="EarlyStopping patience on val/acc (default: 15)")
     return parser.parse_args()
 
 
@@ -235,8 +241,20 @@ def main() -> None:
         parser = argparse.ArgumentParser()
         parser.error("--model is required for training")
 
+    if args.seed is not None:
+        pl.seed_everything(args.seed, workers=True)
+
     config = MODELS[args.model]
     is_distill = config.get("distill", False)
+
+    # Unique run name when running sweeps (subset / seed).
+    # Keeps defaults bit-identical to pre-sweep behavior.
+    if args.train_subset is not None or args.seed is not None:
+        subset_tag = args.train_subset if args.train_subset is not None else "full"
+        seed_tag = args.seed if args.seed is not None else 0
+        run_name = f"{args.model}_n{subset_tag}_s{seed_tag}"
+    else:
+        run_name = args.model
 
     # ------------------------------------------------------------------
     # Data
@@ -251,6 +269,8 @@ def main() -> None:
         teacher_logits_path=args.teacher_logits if is_distill else None,
         image_size=config.get("image_size"),
         imagenet_norm=config.get("imagenet_norm", False),
+        train_subset=args.train_subset,
+        subset_seed=args.seed if args.seed is not None else 0,
     )
 
     # ------------------------------------------------------------------
@@ -279,16 +299,16 @@ def main() -> None:
         )
 
     # ------------------------------------------------------------------
-    # TensorBoard logger  (events written to ./logs/<model>/)
+    # TensorBoard logger  (events written to ./logs/<run_name>/)
     # ------------------------------------------------------------------
-    logger = TensorBoardLogger(save_dir="./logs", name=args.model)
+    logger = TensorBoardLogger(save_dir="./logs", name=run_name)
 
     # ------------------------------------------------------------------
-    # Checkpointing  (saved to ./checkpoints/<model>/)
+    # Checkpointing  (saved to ./checkpoints/<run_name>/)
     # ------------------------------------------------------------------
     checkpoint_cb = ModelCheckpoint(
-        dirpath=f"./checkpoints/{args.model}",
-        filename=f"{args.model}-{{epoch:02d}}-{{val/acc:.3f}}",
+        dirpath=f"./checkpoints/{run_name}",
+        filename=f"{run_name}-{{epoch:02d}}-{{val/acc:.3f}}",
         monitor="val/acc",
         mode="max",
         save_last=True,
@@ -296,7 +316,7 @@ def main() -> None:
 
     early_stop_cb = EarlyStopping(
         monitor="val/acc",
-        patience=15,
+        patience=args.patience,
         mode="max",
     )
 

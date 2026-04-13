@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import torch
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader, Dataset, TensorDataset
+from torch.utils.data import DataLoader, Dataset, Subset, TensorDataset
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 
@@ -57,6 +57,8 @@ class CIFAR10DataModule(pl.LightningDataModule):
         teacher_logits_path: str | None = None,
         image_size: int | None = None,
         imagenet_norm: bool = False,
+        train_subset: int | None = None,
+        subset_seed: int = 0,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
@@ -65,6 +67,8 @@ class CIFAR10DataModule(pl.LightningDataModule):
         self.flatten = flatten
         self.augment = augment
         self.teacher_logits = torch.load(teacher_logits_path, map_location="cpu", weights_only=True) if teacher_logits_path else None
+        self.train_subset = train_subset
+        self.subset_seed = subset_seed
 
         mean = self.IMAGENET_MEAN if imagenet_norm else self.MEAN
         std = self.IMAGENET_STD if imagenet_norm else self.STD
@@ -129,6 +133,15 @@ class CIFAR10DataModule(pl.LightningDataModule):
             # Attach precomputed teacher logits (for distillation)
             if self.teacher_logits is not None:
                 self.train_dataset = _WithTeacherLogits(self.train_dataset, self.teacher_logits)
+
+            # Subset the training set for data-scaling experiments.
+            # Subset selection is seeded so different training seeds see
+            # different subsets — exposing combined data + init variance.
+            if self.train_subset is not None:
+                gen = torch.Generator().manual_seed(self.subset_seed)
+                n = len(self.train_dataset)
+                indices = torch.randperm(n, generator=gen)[: self.train_subset].tolist()
+                self.train_dataset = Subset(self.train_dataset, indices)
 
     def train_dataloader(self) -> DataLoader:
         assert self.train_dataset is not None, "Call setup('fit') first."

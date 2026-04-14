@@ -1,0 +1,3 @@
+lr: 0.001
+warmup_epochs: 5
+weight_decay: 0.02

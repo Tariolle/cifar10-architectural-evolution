@@ -1,0 +1,10 @@
+Unloading the cpe module is insufficient to restore the system defaults.
+Please run 'source
+/opt/cray/pe/cpe/24.07/restore_lmod_system_defaults.[csh|sh]'. 
+remove gcc/13.2 - cray-mpich/8.1.30 - milan - cpe 24.07
+load python3 3.13 for pytorch environment (with numpy 2.2.3, scikit-learn 1.6.1, torch 2.6.0, optuna 4.2.1, timm 1.0.15, transformers 4.49.0)
+load more details: pip list
+[rank: 0] Seed set to 0
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+SLURM auto-requeueing enabled. Setting signal handlers.

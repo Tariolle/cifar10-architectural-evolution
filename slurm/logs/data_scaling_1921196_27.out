@@ -1,0 +1,371 @@
+Requirement already satisfied: pytorch-lightning in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (2.6.1)
+Requirement already satisfied: torchmetrics in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (1.9.0)
+Requirement already satisfied: fvcore in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (0.1.5.post20221221)
+Requirement already satisfied: rich in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (15.0.0)
+Requirement already satisfied: torch>=2.1.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from pytorch-lightning) (2.6.0+cu126)
+Requirement already satisfied: tqdm>=4.57.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from pytorch-lightning) (4.67.1)
+Requirement already satisfied: PyYAML>5.4 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from pytorch-lightning) (6.0.2)
+Requirement already satisfied: fsspec>=2022.5.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from fsspec[http]>=2022.5.0->pytorch-lightning) (2024.12.0)
+Requirement already satisfied: packaging>=23.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from pytorch-lightning) (24.2)
+Requirement already satisfied: typing-extensions>4.5.0 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from pytorch-lightning) (4.15.0)
+Requirement already satisfied: lightning-utilities>=0.10.0 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from pytorch-lightning) (0.15.3)
+Requirement already satisfied: numpy>1.20.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torchmetrics) (2.2.3)
+Requirement already satisfied: yacs>=0.1.6 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from fvcore) (0.1.8)
+Requirement already satisfied: termcolor>=1.1 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from fvcore) (3.3.0)
+Requirement already satisfied: Pillow in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from fvcore) (11.1.0)
+Requirement already satisfied: tabulate in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from fvcore) (0.10.0)
+Requirement already satisfied: iopath>=0.1.7 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from fvcore) (0.1.10)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from rich) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from rich) (2.19.1)
+Requirement already satisfied: aiohttp!=4.0.0a0,!=4.0.0a1 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from fsspec[http]>=2022.5.0->pytorch-lightning) (3.11.13)
+Requirement already satisfied: portalocker in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from iopath>=0.1.7->fvcore) (3.2.0)
+Requirement already satisfied: mdurl~=0.1 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from markdown-it-py>=2.2.0->rich) (0.1.2)
+Requirement already satisfied: filelock in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (3.17.0)
+Requirement already satisfied: setuptools in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (75.8.0)
+Requirement already satisfied: sympy==1.13.1 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (1.13.1)
+Requirement already satisfied: networkx in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (3.4.2)
+Requirement already satisfied: jinja2 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (3.1.5)
+Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.6.77 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.77)
+Requirement already satisfied: nvidia-cuda-runtime-cu12==12.6.77 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.77)
+Requirement already satisfied: nvidia-cuda-cupti-cu12==12.6.80 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.80)
+Requirement already satisfied: nvidia-cudnn-cu12==9.5.1.17 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (9.5.1.17)
+Requirement already satisfied: nvidia-cublas-cu12==12.6.4.1 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.4.1)
+Requirement already satisfied: nvidia-cufft-cu12==11.3.0.4 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (11.3.0.4)
+Requirement already satisfied: nvidia-curand-cu12==10.3.7.77 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (10.3.7.77)
+Requirement already satisfied: nvidia-cusolver-cu12==11.7.1.2 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (11.7.1.2)
+Requirement already satisfied: nvidia-cusparse-cu12==12.5.4.2 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.5.4.2)
+Requirement already satisfied: nvidia-cusparselt-cu12==0.6.3 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (0.6.3)
+Requirement already satisfied: nvidia-nccl-cu12==2.21.5 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (2.21.5)
+Requirement already satisfied: nvidia-nvtx-cu12==12.6.77 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.77)
+Requirement already satisfied: nvidia-nvjitlink-cu12==12.6.85 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (12.6.85)
+Requirement already satisfied: triton==3.2.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from torch>=2.1.0->pytorch-lightning) (3.2.0)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from sympy==1.13.1->torch>=2.1.0->pytorch-lightning) (1.3.0)
+Requirement already satisfied: aiohappyeyeballs>=2.3.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (2.4.6)
+Requirement already satisfied: aiosignal>=1.1.2 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (1.3.2)
+Requirement already satisfied: attrs>=17.3.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (25.1.0)
+Requirement already satisfied: frozenlist>=1.1.1 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (1.5.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (6.1.0)
+Requirement already satisfied: propcache>=0.2.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (0.2.1)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (1.18.3)
+Requirement already satisfied: MarkupSafe>=2.0 in /soft/AIDL/conda_envs/pytorch260/lib/python3.13/site-packages (from jinja2->torch>=2.1.0->pytorch-lightning) (3.0.2)
+Requirement already satisfied: idna>=2.0 in /home/2500001/ftari001/.python3-3.13-torch260/site-packages/lib/python3.13/site-packages (from yarl<2.0,>=1.17.0->aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=2022.5.0->pytorch-lightning) (2.10)
+=== Task 27: model=swin  N=50000  seed=0  (Mon Apr 13 04:49:55 PM CEST 2026) ===
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name      ┃ Type               ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ model     │ OptimizedModule    │  5.4 M │ train │     0 │
+│ 1 │ criterion │ CrossEntropyLoss   │      0 │ train │     0 │
+│ 2 │ train_acc │ MulticlassAccuracy │      0 │ train │     0 │
+│ 3 │ val_acc   │ MulticlassAccuracy │      0 │ train │     0 │
+└───┴───────────┴────────────────────┴────────┴───────┴───────┘
+Trainable params: 5.4 M                                                         
+Non-trainable params: 0                                                         
+Total params: 5.4 M                                                             
+Total estimated model params size (MB): 21                                      
+Modules in train mode: 163                                                      
+Modules in eval mode: 0                                                         
+Total FLOPs: 0                                                                  
+  Epoch 1/300 — ETA: 13:12:38
+  Epoch 2/300 — ETA: 07:11:10
+  Epoch 3/300 — ETA: 05:10:28
+  Epoch 4/300 — ETA: 04:10:54
+  Epoch 5/300 — ETA: 03:34:50
+  Epoch 6/300 — ETA: 03:10:12
+  Epoch 7/300 — ETA: 02:52:44
+  Epoch 8/300 — ETA: 02:39:57
+  Epoch 9/300 — ETA: 02:30:04
+  Epoch 10/300 — ETA: 02:21:21
+  Epoch 11/300 — ETA: 02:14:20
+  Epoch 12/300 — ETA: 02:07:56
+  Epoch 13/300 — ETA: 02:02:32
+  Epoch 14/300 — ETA: 01:58:00
+  Epoch 15/300 — ETA: 01:53:44
+  Epoch 16/300 — ETA: 01:50:19
+  Epoch 17/300 — ETA: 01:47:21
+  Epoch 18/300 — ETA: 01:44:13
+  Epoch 19/300 — ETA: 01:41:33
+  Epoch 20/300 — ETA: 01:39:18
+  Epoch 21/300 — ETA: 01:37:22
+  Epoch 22/300 — ETA: 01:35:28
+  Epoch 23/300 — ETA: 01:33:38
+  Epoch 24/300 — ETA: 01:31:52
+  Epoch 25/300 — ETA: 01:30:37
+  Epoch 26/300 — ETA: 01:29:30
+  Epoch 27/300 — ETA: 01:28:18
+  Epoch 28/300 — ETA: 01:27:01
+  Epoch 29/300 — ETA: 01:25:43
+  Epoch 30/300 — ETA: 01:24:35
+  Epoch 31/300 — ETA: 01:23:28
+  Epoch 32/300 — ETA: 01:22:20
+  Epoch 33/300 — ETA: 01:21:19
+  Epoch 34/300 — ETA: 01:20:24
+  Epoch 35/300 — ETA: 01:19:36
+  Epoch 36/300 — ETA: 01:18:44
+  Epoch 37/300 — ETA: 01:17:55
+  Epoch 38/300 — ETA: 01:17:04
+  Epoch 39/300 — ETA: 01:16:17
+  Epoch 40/300 — ETA: 01:15:34
+  Epoch 41/300 — ETA: 01:14:54
+  Epoch 42/300 — ETA: 01:14:11
+  Epoch 43/300 — ETA: 01:13:30
+  Epoch 44/300 — ETA: 01:12:50
+  Epoch 45/300 — ETA: 01:12:12
+  Epoch 46/300 — ETA: 01:11:37
+  Epoch 47/300 — ETA: 01:11:08
+  Epoch 48/300 — ETA: 01:10:46
+  Epoch 49/300 — ETA: 01:10:13
+  Epoch 50/300 — ETA: 01:09:41
+  Epoch 51/300 — ETA: 01:09:04
+  Epoch 52/300 — ETA: 01:08:31
+  Epoch 53/300 — ETA: 01:07:57
+  Epoch 54/300 — ETA: 01:07:26
+  Epoch 55/300 — ETA: 01:06:56
+  Epoch 56/300 — ETA: 01:06:26
+  Epoch 57/300 — ETA: 01:05:56
+  Epoch 58/300 — ETA: 01:05:26
+  Epoch 59/300 — ETA: 01:04:56
+  Epoch 60/300 — ETA: 01:04:33
+  Epoch 61/300 — ETA: 01:04:09
+  Epoch 62/300 — ETA: 01:03:42
+  Epoch 63/300 — ETA: 01:03:19
+  Epoch 64/300 — ETA: 01:02:59
+  Epoch 65/300 — ETA: 01:02:33
+  Epoch 66/300 — ETA: 01:02:06
+  Epoch 67/300 — ETA: 01:01:41
+  Epoch 68/300 — ETA: 01:01:14
+  Epoch 69/300 — ETA: 01:00:50
+  Epoch 70/300 — ETA: 01:00:27
+  Epoch 71/300 — ETA: 01:00:04
+  Epoch 72/300 — ETA: 00:59:43
+  Epoch 73/300 — ETA: 00:59:19
+  Epoch 74/300 — ETA: 00:58:56
+  Epoch 75/300 — ETA: 00:58:31
+  Epoch 76/300 — ETA: 00:58:06
+  Epoch 77/300 — ETA: 00:57:43
+  Epoch 78/300 — ETA: 00:57:17
+  Epoch 79/300 — ETA: 00:56:51
+  Epoch 80/300 — ETA: 00:56:29
+  Epoch 81/300 — ETA: 00:56:05
+  Epoch 82/300 — ETA: 00:55:42
+  Epoch 83/300 — ETA: 00:55:21
+  Epoch 84/300 — ETA: 00:55:00
+  Epoch 85/300 — ETA: 00:54:36
+  Epoch 86/300 — ETA: 00:54:15
+  Epoch 87/300 — ETA: 00:53:55
+  Epoch 88/300 — ETA: 00:53:37
+  Epoch 89/300 — ETA: 00:53:18
+  Epoch 90/300 — ETA: 00:52:58
+  Epoch 91/300 — ETA: 00:52:37
+  Epoch 92/300 — ETA: 00:52:18
+  Epoch 93/300 — ETA: 00:51:57
+  Epoch 94/300 — ETA: 00:51:37
+  Epoch 95/300 — ETA: 00:51:19
+  Epoch 96/300 — ETA: 00:50:59
+  Epoch 97/300 — ETA: 00:50:40
+  Epoch 98/300 — ETA: 00:50:22
+  Epoch 99/300 — ETA: 00:50:03
+  Epoch 100/300 — ETA: 00:49:45
+  Epoch 101/300 — ETA: 00:49:27
+  Epoch 102/300 — ETA: 00:49:10
+  Epoch 103/300 — ETA: 00:48:56
+  Epoch 104/300 — ETA: 00:48:43
+  Epoch 105/300 — ETA: 00:48:30
+  Epoch 106/300 — ETA: 00:48:14
+  Epoch 107/300 — ETA: 00:47:58
+  Epoch 108/300 — ETA: 00:47:41
+  Epoch 109/300 — ETA: 00:47:24
+  Epoch 110/300 — ETA: 00:47:05
+  Epoch 111/300 — ETA: 00:46:50
+  Epoch 112/300 — ETA: 00:46:35
+  Epoch 113/300 — ETA: 00:46:19
+  Epoch 114/300 — ETA: 00:46:04
+  Epoch 115/300 — ETA: 00:45:47
+  Epoch 116/300 — ETA: 00:45:31
+  Epoch 117/300 — ETA: 00:45:14
+  Epoch 118/300 — ETA: 00:44:56
+  Epoch 119/300 — ETA: 00:44:38
+  Epoch 120/300 — ETA: 00:44:21
+  Epoch 121/300 — ETA: 00:44:04
+  Epoch 122/300 — ETA: 00:43:46
+  Epoch 123/300 — ETA: 00:43:28
+  Epoch 124/300 — ETA: 00:43:10
+  Epoch 125/300 — ETA: 00:42:53
+  Epoch 126/300 — ETA: 00:42:36
+  Epoch 127/300 — ETA: 00:42:20
+  Epoch 128/300 — ETA: 00:42:03
+  Epoch 129/300 — ETA: 00:41:45
+  Epoch 130/300 — ETA: 00:41:29
+  Epoch 131/300 — ETA: 00:41:12
+  Epoch 132/300 — ETA: 00:40:55
+  Epoch 133/300 — ETA: 00:40:38
+  Epoch 134/300 — ETA: 00:40:22
+  Epoch 135/300 — ETA: 00:40:05
+  Epoch 136/300 — ETA: 00:39:49
+  Epoch 137/300 — ETA: 00:39:32
+  Epoch 138/300 — ETA: 00:39:16
+  Epoch 139/300 — ETA: 00:39:00
+  Epoch 140/300 — ETA: 00:38:45
+  Epoch 141/300 — ETA: 00:38:29
+  Epoch 142/300 — ETA: 00:38:14
+  Epoch 143/300 — ETA: 00:37:57
+  Epoch 144/300 — ETA: 00:37:42
+  Epoch 145/300 — ETA: 00:37:26
+  Epoch 146/300 — ETA: 00:37:09
+  Epoch 147/300 — ETA: 00:36:53
+  Epoch 148/300 — ETA: 00:36:37
+  Epoch 149/300 — ETA: 00:36:21
+  Epoch 150/300 — ETA: 00:36:05
+  Epoch 151/300 — ETA: 00:35:49
+  Epoch 152/300 — ETA: 00:35:35
+  Epoch 153/300 — ETA: 00:35:18
+  Epoch 154/300 — ETA: 00:35:02
+  Epoch 155/300 — ETA: 00:34:46
+  Epoch 156/300 — ETA: 00:34:31
+  Epoch 157/300 — ETA: 00:34:16
+  Epoch 158/300 — ETA: 00:34:01
+  Epoch 159/300 — ETA: 00:33:46
+  Epoch 160/300 — ETA: 00:33:31
+  Epoch 161/300 — ETA: 00:33:16
+  Epoch 162/300 — ETA: 00:33:00
+  Epoch 163/300 — ETA: 00:32:45
+  Epoch 164/300 — ETA: 00:32:29
+  Epoch 165/300 — ETA: 00:32:14
+  Epoch 166/300 — ETA: 00:31:59
+  Epoch 167/300 — ETA: 00:31:46
+  Epoch 168/300 — ETA: 00:31:31
+  Epoch 169/300 — ETA: 00:31:16
+  Epoch 170/300 — ETA: 00:31:01
+  Epoch 171/300 — ETA: 00:30:47
+  Epoch 172/300 — ETA: 00:30:32
+  Epoch 173/300 — ETA: 00:30:16
+  Epoch 174/300 — ETA: 00:30:01
+  Epoch 175/300 — ETA: 00:29:46
+  Epoch 176/300 — ETA: 00:29:31
+  Epoch 177/300 — ETA: 00:29:16
+  Epoch 178/300 — ETA: 00:29:01
+  Epoch 179/300 — ETA: 00:28:45
+  Epoch 180/300 — ETA: 00:28:29
+  Epoch 181/300 — ETA: 00:28:14
+  Epoch 182/300 — ETA: 00:27:59
+  Epoch 183/300 — ETA: 00:27:44
+  Epoch 184/300 — ETA: 00:27:28
+  Epoch 185/300 — ETA: 00:27:13
+  Epoch 186/300 — ETA: 00:26:59
+  Epoch 187/300 — ETA: 00:26:44
+  Epoch 188/300 — ETA: 00:26:29
+  Epoch 189/300 — ETA: 00:26:14
+  Epoch 190/300 — ETA: 00:25:59
+  Epoch 191/300 — ETA: 00:25:45
+  Epoch 192/300 — ETA: 00:25:31
+  Epoch 193/300 — ETA: 00:25:17
+  Epoch 194/300 — ETA: 00:25:04
+  Epoch 195/300 — ETA: 00:24:50
+  Epoch 196/300 — ETA: 00:24:36
+  Epoch 197/300 — ETA: 00:24:22
+  Epoch 198/300 — ETA: 00:24:08
+  Epoch 199/300 — ETA: 00:23:53
+  Epoch 200/300 — ETA: 00:23:38
+  Epoch 201/300 — ETA: 00:23:24
+  Epoch 202/300 — ETA: 00:23:10
+  Epoch 203/300 — ETA: 00:22:56
+  Epoch 204/300 — ETA: 00:22:42
+  Epoch 205/300 — ETA: 00:22:28
+  Epoch 206/300 — ETA: 00:22:15
+  Epoch 207/300 — ETA: 00:22:01
+  Epoch 208/300 — ETA: 00:21:47
+  Epoch 209/300 — ETA: 00:21:33
+  Epoch 210/300 — ETA: 00:21:20
+  Epoch 211/300 — ETA: 00:21:06
+  Epoch 212/300 — ETA: 00:20:51
+  Epoch 213/300 — ETA: 00:20:37
+  Epoch 214/300 — ETA: 00:20:22
+  Epoch 215/300 — ETA: 00:20:08
+  Epoch 216/300 — ETA: 00:19:53
+  Epoch 217/300 — ETA: 00:19:39
+  Epoch 218/300 — ETA: 00:19:25
+  Epoch 219/300 — ETA: 00:19:11
+  Epoch 220/300 — ETA: 00:18:57
+  Epoch 221/300 — ETA: 00:18:44
+  Epoch 222/300 — ETA: 00:18:30
+  Epoch 223/300 — ETA: 00:18:16
+  Epoch 224/300 — ETA: 00:18:02
+  Epoch 225/300 — ETA: 00:17:48
+  Epoch 226/300 — ETA: 00:17:35
+  Epoch 227/300 — ETA: 00:17:21
+  Epoch 228/300 — ETA: 00:17:06
+  Epoch 229/300 — ETA: 00:16:52
+  Epoch 230/300 — ETA: 00:16:38
+  Epoch 231/300 — ETA: 00:16:24
+  Epoch 232/300 — ETA: 00:16:09
+  Epoch 233/300 — ETA: 00:15:54
+  Epoch 234/300 — ETA: 00:15:39
+  Epoch 235/300 — ETA: 00:15:25
+  Epoch 236/300 — ETA: 00:15:10
+  Epoch 237/300 — ETA: 00:14:55
+  Epoch 238/300 — ETA: 00:14:41
+  Epoch 239/300 — ETA: 00:14:26
+  Epoch 240/300 — ETA: 00:14:11
+  Epoch 241/300 — ETA: 00:13:57
+  Epoch 242/300 — ETA: 00:13:42
+  Epoch 243/300 — ETA: 00:13:28
+  Epoch 244/300 — ETA: 00:13:13
+  Epoch 245/300 — ETA: 00:12:59
+  Epoch 246/300 — ETA: 00:12:45
+  Epoch 247/300 — ETA: 00:12:30
+  Epoch 248/300 — ETA: 00:12:16
+  Epoch 249/300 — ETA: 00:12:02
+  Epoch 250/300 — ETA: 00:11:47
+  Epoch 251/300 — ETA: 00:11:33
+  Epoch 252/300 — ETA: 00:11:19
+  Epoch 253/300 — ETA: 00:11:04
+  Epoch 254/300 — ETA: 00:10:50
+  Epoch 255/300 — ETA: 00:10:35
+  Epoch 256/300 — ETA: 00:10:21
+  Epoch 257/300 — ETA: 00:10:07
+  Epoch 258/300 — ETA: 00:09:52
+  Epoch 259/300 — ETA: 00:09:38
+  Epoch 260/300 — ETA: 00:09:24
+  Epoch 261/300 — ETA: 00:09:09
+  Epoch 262/300 — ETA: 00:08:55
+  Epoch 263/300 — ETA: 00:08:41
+  Epoch 264/300 — ETA: 00:08:27
+  Epoch 265/300 — ETA: 00:08:12
+  Epoch 266/300 — ETA: 00:07:58
+  Epoch 267/300 — ETA: 00:07:44
+  Epoch 268/300 — ETA: 00:07:30
+  Epoch 269/300 — ETA: 00:07:16
+  Epoch 270/300 — ETA: 00:07:02
+  Epoch 271/300 — ETA: 00:06:48
+  Epoch 272/300 — ETA: 00:06:33
+  Epoch 273/300 — ETA: 00:06:19
+  Epoch 274/300 — ETA: 00:06:05
+  Epoch 275/300 — ETA: 00:05:51
+  Epoch 276/300 — ETA: 00:05:37
+  Epoch 277/300 — ETA: 00:05:23
+  Epoch 278/300 — ETA: 00:05:09
+  Epoch 279/300 — ETA: 00:04:55
+Epoch 278/299 ━━━━━━━━━━━━━━━ 391/391 0:00:12 •       31.24it/s v_num: 0.000    
+                                      0:00:00                   val/loss: 0.618 
+                                                                val/acc: 0.892  
+                                                                train/loss:     
+                                                                0.006 train/acc:
+                                                                0.998           
+
+########################################
+   Comptabilité du calcul 1923132 
+########################################
+$ sacct --format='JobID,Partition,JobName,MaxRSS,MaxVMSize,NTasks,AllocCPUS,Start,End,Elapsed,AveCPU,MinCPU,NNodes,ExitCode,State' -j 1923132
+JobID              Partition  JobName      MaxRSS   MaxVMSize  NTasks  AllocCPUS  Start                End                  Elapsed   AveCPU  MinCPU  NNodes  ExitCode  State      
+-----              ---------  -------      -------  ---------  ------  ---------  -----                ---                  -------   ------  ------  ------  --------  -----      
+1921196_27         ar_a100    cifar_scale                              8          2026-04-13T16:49:52  2026-04-13T17:56:03  01:06:11                  1       0:0       COMPLETED  
+1921196_27.batch              batch                            1       8          2026-04-13T16:49:52  2026-04-13T17:56:03  01:06:11                  1       0:0       COMPLETED  
+1921196_27.extern             extern                           1       8          2026-04-13T16:49:52  2026-04-13T17:56:03  01:06:11                  1       0:0       COMPLETED  
+
+$ sacct --format='JobID,JobName,AllocCPUS,ReqTRES,AllocTRES,NNodes,NodeList,Elapsed,CPUTime' -j 1923132
+JobID              JobName      AllocCPUS  ReqTRES                                                    AllocTRES                                                  NNodes  NodeList  Elapsed   CPUTime   
+-----              -------      ---------  -------                                                    ---------                                                  ------  --------  -------   -------   
+1921196_27         cifar_scale  8          billing=8,cpu=8,gres/gpu:a100=1,gres/gpu=1,mem=32G,node=1  billing=8,cpu=8,gres/gpu:a100=1,gres/gpu=1,mem=32G,node=1  1       c23gpu1   01:06:11  08:49:28  
+1921196_27.batch   batch        8                                                                     cpu=8,gres/gpu:a100=1,gres/gpu=1,mem=32G,node=1            1       c23gpu1   01:06:11  08:49:28  
+1921196_27.extern  extern       8                                                                     billing=8,cpu=8,gres/gpu:a100=1,gres/gpu=1,mem=32G,node=1  1       c23gpu1   01:06:11  08:49:28  
+
+Pour plus d'informations sur la comptabilité du calcul, merci de consulter la documentation http://www-tech.criann.fr ou le manuel 'man sacct'

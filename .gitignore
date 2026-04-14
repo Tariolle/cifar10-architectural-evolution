@@ -1,5 +1,6 @@
 # Data & logs (generated at runtime)
 data/
+slurm/logs/
 
 # Python
 __pycache__/

@@ -7,3 +7,5 @@ fvcore==0.1.5.post20221221
 numpy==2.3.5
 triton-windows==3.6.0.post26
 rich==14.3.3
+tbparse==0.0.9
+matplotlib==3.10.8

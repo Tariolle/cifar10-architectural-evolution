@@ -1,6 +1,5 @@
 # Data & logs (generated at runtime)
 data/
-logs/
 
 # Python
 __pycache__/
